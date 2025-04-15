@@ -10,7 +10,7 @@ st.markdown("""
     <style>
         /* Shrink sidebar width */
         [data-testid="stSidebar"] {
-            width: 150px !important;
+            width: 220px !important;
         }
         [data-testid="stSidebarContent"] {
             padding: 1rem;
@@ -18,15 +18,16 @@ st.markdown("""
 
         /* Reduce font size for sidebar elements */
         .css-1v0mbdj, .css-qbe2hs, .st-emotion-cache-16idsys p, label, span, .stSelectbox label {
-            font-size: 12px !important;
+            font-size: 13px !important;
         }
 
         /* Smaller font inside dropdowns */
         .stSelectbox div[data-baseweb="select"] {
-            font-size: 10px !important;
+            font-size: 12px !important;
         }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 @st.cache_data(ttl=300)
