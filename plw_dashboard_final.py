@@ -149,7 +149,7 @@ withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
 labels = ['\n'.join(textwrap.wrap(label, 10)) for label in benchmark.index]
 x = np.arange(len(benchmark))  # <-- This is the missing line
 
-fig, ax = plt.subplots(figsize=(12, 4))
+fig, ax = plt.subplots(figsize=(12, 6))
 bar1 = ax.bar(x - 0.2, benchmark.values, 0.4, label="Benchmark", color="darkgreen")
 bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred")
 
