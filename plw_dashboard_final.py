@@ -68,16 +68,20 @@ c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 def pie_chart(data, labels, title, colors):
     fig, ax = plt.subplots(figsize=(3.5, 3.5))
     total = sum(data)
-    formatted_labels = [f"{label} ({count:,}, {int(count / total * 100)}%)" for label, count in zip(labels, data)]
+    percentages = [int(round((count / total) * 100)) for count in data]
+    inline_labels = [f"{label} ({count:,}, {pct}%)" for label, count, pct in zip(labels, data, percentages)]
+
     wedges, texts = ax.pie(
         data,
-        labels=formatted_labels,
+        labels=inline_labels,
         startangle=90,
         colors=colors,
         textprops={"color": "white", "fontsize": 10}
     )
+
     ax.set_title(title)
     return fig
+
 
 # Engagement Section
 st.subheader("🔄 PLW Engagement Overview")
