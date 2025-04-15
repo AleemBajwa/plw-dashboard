@@ -143,25 +143,23 @@ ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
 # --- Benchmark vs Withdrawn (Max) ---
-st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
-benchmark = group["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
-withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
-x = np.arange(len(benchmark))
-labels = ['\n'.join(textwrap.wrap(label, 10)) for label in benchmark.index]
-
 fig, ax = plt.subplots(figsize=(10, 4))
 bar1 = ax.bar(x - 0.2, benchmark.values, 0.4, label="Benchmark", color="darkgreen")
 bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred")
 
 for bars in [bar1, bar2]:
     for bar in bars:
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2000, f"{int(bar.get_height()):,}",
-                ha="center", color="black", fontsize=8, rotation=90)
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() - 8000, f"{int(bar.get_height()):,}",
+                ha="center", va="top", color="white", fontsize=9)
+
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
-ax.set_ylabel("Rs.")
 ax.legend()
+ax.set_ylabel("Rs.")
+ax.spines['left'].set_visible(False)
+ax.tick_params(axis='y', left=False, labelleft=False)
 st.pyplot(fig)
+
 
 # --- Reason for Non-Withdrawal ---
 st.subheader("📌 Reason for Non-Withdrawal")
