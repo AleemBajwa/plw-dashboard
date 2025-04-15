@@ -59,12 +59,11 @@ st.title("📊 PLW Dashboard Summary")
 c1, c2, c3 = st.columns(3)
 c4, c5, c6 = st.columns(3)
 
-c1.metric("Total PLWs (CNIC)", f"{total_cnic:,}")
+c1.metric("Total PLWs", f"{total_cnic:,}")
 c2.metric("Withdrawn PLWs", f"{withdrawn_cnic:,}")
-c3.metric("LHWs Eligible for Incentive", f"{eligible_cnic:,}")
-
-c4.metric("Not Withdrawn", f"{not_withdrawn:,}")
-c5.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
+c3.metric("Not Withdrawn PLWs", f"{not_withdrawn:,}")
+c4.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
+c5.metric("LHWs Eligible for Incentive", f"{eligible_cnic:,}")
 c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 
 # --- Pie Charts ---
