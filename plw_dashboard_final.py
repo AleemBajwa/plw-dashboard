@@ -162,6 +162,7 @@ for bars in [bar1, bar2]:
 
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
+ax.tick_params(axis='x', labelsize=8)
 
 ax.legend()
 st.pyplot(fig)
