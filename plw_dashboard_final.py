@@ -85,17 +85,36 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     contact_counts = filtered_df["Contact with PLW (Y/N)"].value_counts()
-    fig = pie_chart(contact_counts.values, contact_counts.index, "Contact with PLW", ["darkgreen", "darkred"])
+    labels = ['yes', 'no']
+    data = [contact_counts.get(label, 0) for label in labels]
+    fig = pie_chart(data, labels, "Contact with PLW", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
 with col2:
     visit_counts = filtered_df["PLW visited the Campsite"].value_counts()
-    fig = pie_chart(visit_counts.values, visit_counts.index, "Visited Camp", ["darkgreen", "darkred"])
+    labels = ['yes', 'no']
+    data = [visit_counts.get(label, 0) for label in labels]
+    fig = pie_chart(data, labels, "Visited Camp", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
 with col3:
     fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal Count", ["darkgreen", "darkred"])
     st.pyplot(fig)
+
+# 🔻 Add legend below the pie charts
+st.markdown("""
+<div style='text-align: center; padding-top: 10px;'>
+    <span style='display: inline-block; margin-right: 30px;'>
+        <span style='display:inline-block; width:12px; height:12px; background-color:darkgreen; margin-right:5px;'></span>
+        <strong>Green:</strong> Yes / Withdrawn
+    </span>
+    <span style='display: inline-block;'>
+        <span style='display:inline-block; width:12px; height:12px; background-color:darkred; margin-right:5px;'></span>
+        <strong>Red:</strong> No / Not Withdrawn
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
 
 # --- PLW Status Horizontal Bar ---
 st.subheader("👤 PLW Status")
