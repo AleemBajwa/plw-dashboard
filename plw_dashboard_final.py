@@ -119,11 +119,11 @@ st.markdown("""
 # --- PLW Status Horizontal Bar ---
 st.subheader("👤 PLW Status")
 status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
-fig, ax = plt.subplots(figsize=(6, 3))
+fig, ax = plt.subplots(figsize=(4, 2))
 bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colors)
 for bar in bars:
     ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
-            ha="right", va="center", color="white", fontsize=9)
+            ha="right", va="center", color="white", fontsize=8)
 st.pyplot(fig)
 
 # --- ADFO-wise Withdrawal % ---
