@@ -160,8 +160,8 @@ for bars in [bar1, bar2]:
 
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
-ax.spines['left'].set_visible(False)
-ax.tick_params(axis='y', left=False, labelleft=False)
+ax.spines['left'].set_visible(True)
+ax.tick_params(axis='y', left=True, labelleft=True)
 ax.legend()
 st.pyplot(fig)
 
