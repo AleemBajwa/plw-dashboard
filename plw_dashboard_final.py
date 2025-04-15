@@ -96,6 +96,8 @@ with col2:
 with col3:
     fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal Count", ["darkgreen", "darkred"])
     st.pyplot(fig)
+    st.markdown("🟩 **Green:** Yes / Withdrawn &nbsp;&nbsp;&nbsp;&nbsp; 🟥 **Red:** No / Not Withdrawn")
+
 
 # --- PLW Status Horizontal Bar ---
 st.subheader("👤 PLW Status")
