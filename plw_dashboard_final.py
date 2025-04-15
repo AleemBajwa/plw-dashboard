@@ -76,7 +76,7 @@ def pie_chart(data, labels, title, colors):
         labels=display_labels,
         startangle=90,
         colors=colors,
-        labeldistance=1,  # bring labels inward
+        labeldistance=0.5,  # bring labels inward
         textprops={"color": "white", "fontsize": 10}
     )
     ax.set_title(title)
