@@ -6,14 +6,24 @@ import textwrap
 
 st.set_page_config(page_title="PLW Dashboard", layout="wide")
 
-# Custom CSS to shrink the sidebar
 st.markdown("""
     <style>
+        /* Shrink sidebar width */
         [data-testid="stSidebar"] {
-            width: 300px !important;  /* Adjust as needed */
+            width: 220px !important;
         }
         [data-testid="stSidebarContent"] {
             padding: 1rem;
+        }
+
+        /* Reduce font size for sidebar elements */
+        .css-1v0mbdj, .css-qbe2hs, .st-emotion-cache-16idsys p, label, span, .stSelectbox label {
+            font-size: 13px !important;
+        }
+
+        /* Smaller font inside dropdowns */
+        .stSelectbox div[data-baseweb="select"] {
+            font-size: 12px !important;
         }
     </style>
 """, unsafe_allow_html=True)
