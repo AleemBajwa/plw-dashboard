@@ -26,7 +26,7 @@ statuses = st.sidebar.multiselect("PLW Status (NWD or PWD)", options=df['Status 
 df_filtered = df[df['District'].isin(districts) & df['ADFO Name'].isin(adfos) & df['Status of PLW (NWD or PWD)'].isin(statuses)]
 
 # Eligibility logic
-eligible_df = df_filtered[df_filtered['plw unable to withdraw'] != 'yes']
+eligible_df = df_filtered[df_filtered['PLW unable to withdraw'] != 'yes']
 
 # Summary Metrics
 total_plws = df_filtered['plw cnic no'].nunique()
