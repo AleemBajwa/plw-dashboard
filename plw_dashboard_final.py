@@ -124,7 +124,7 @@ bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colo
 ax.tick_params(axis='y', labelsize=8)
 
 for bar in bars:
-    ax.text(bar.get_width() - 4, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
+    ax.text(bar.get_width() + 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
             ha="right", va="center", color="white", fontsize=8)
 st.pyplot(fig)
 
