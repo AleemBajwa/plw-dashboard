@@ -66,16 +66,19 @@ c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 
 # Pie Chart Function
 def pie_chart(data, labels, title, colors):
-    fig, ax = plt.subplots(figsize=(4, 3))
+    fig, ax = plt.subplots(figsize=(3.5, 3.5))
     total = sum(data)
-    label_fmt = [f"{label} ({count:,}, {int(count / total * 100)}%)" for label, count in zip(labels, data)]
-    ax.pie(
+    label_fmt = [f"{count:,}, {int(count / total * 100)}%" for count in data]
+
+    wedges, texts = ax.pie(
         data,
-        labels=label_fmt,
         startangle=90,
         colors=colors,
+        labels=label_fmt,
+        labeldistance=0.5,
         textprops={"color": "white", "fontsize": 10}
     )
+
     ax.set_title(title)
     return fig
 
