@@ -73,12 +73,28 @@ def pie_chart(data, labels, title, colors, size=(3.2, 3.2)):
         data,
         labels=None,
         startangle=90,
-        autopct=lambda p: f"{int(p * sum(data) / 100):,}\n{int(p)}%",
         colors=colors,
         textprops={"color": "white", "fontsize": 10}
     )
+
+    total = sum(data)
+    for i, (wedge, label, count) in enumerate(zip(wedges, labels, data)):
+        angle = (wedge.theta2 + wedge.theta1) / 2
+        x = np.cos(np.deg2rad(angle))
+        y = np.sin(np.deg2rad(angle))
+        ax.text(
+            x * 0.6,
+            y * 0.6,
+            f"{label.title()}\n{count:,}, {int(count / total * 100)}%",
+            ha="center",
+            va="center",
+            color="white",
+            fontsize=9
+        )
+
     ax.set_title(title)
     return fig
+
 
 st.subheader("🔄 PLW Engagement Overview")
 col1, col2, col3 = st.columns(3)
