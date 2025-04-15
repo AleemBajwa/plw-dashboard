@@ -117,19 +117,6 @@ with col3:
     fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal Count", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
-# 🔻 Add legend below the pie charts
-st.markdown("""
-<div style='text-align: center; padding-top: 10px;'>
-    <span style='display: inline-block; margin-right: 30px;'>
-        <span style='display:inline-block; width:12px; height:12px; background-color:darkgreen; margin-right:5px;'></span>
-        <strong>Green:</strong> Yes / Withdrawn
-    </span>
-    <span style='display: inline-block;'>
-        <span style='display:inline-block; width:12px; height:12px; background-color:darkred; margin-right:5px;'></span>
-        <strong>Red:</strong> No / Not Withdrawn
-    </span>
-</div>
-""", unsafe_allow_html=True)
 
 
 # --- PLW Status Horizontal Bar ---
