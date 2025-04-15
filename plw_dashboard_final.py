@@ -140,9 +140,6 @@ for bar in bars:
     height = bar.get_height()
     ax.text(bar.get_x() + bar.get_width()/2, height - 4, f"{int(height)}%", ha="center", va="top", color="white", fontsize=9)
 
-ax.set_xticks(x)
-ax.set_xticklabels(labels)
-ax.tick_params(axis='x', labelsize=10)
 ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
