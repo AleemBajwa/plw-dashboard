@@ -53,7 +53,6 @@ eligible_df = filtered_df[
     (filtered_df["Status of PLW (NWD or PWD)"].str.lower() != "not in list")
 ]
 
-]
 eligible_cnic = eligible_df["PLW CNIC No"].nunique()
 eligible_amount = eligible_df["Amount (Rs.)"].sum()
 
