@@ -1,8 +1,11 @@
 import streamlit as st
+st.set_page_config(layout="wide")  # 🔥 MUST be placed right after the import of Streamlit
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from textwrap import wrap
+
 
 # --- Load data ---
 url = "https://docs.google.com/spreadsheets/d/1cGRESCZ3ShFOF4yzvGdjopUeMRL2Uyk9tWdbg2P63FA/export?format=xlsx"
