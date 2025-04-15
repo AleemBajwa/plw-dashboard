@@ -18,8 +18,8 @@ def load_data():
 
 df = load_data()
 
-# Sidebar filters
-st.sidebar.title("Filters")
+# Filters
+st.sidebar.title("🔘 Filters")
 districts = ["All"] + sorted(df["District"].dropna().unique())
 adfos = ["All"] + sorted(df["ADFO Name"].dropna().unique())
 statuses = ["All"] + sorted(df["Status of PLW (NWD or PWD)"].dropna().unique())
@@ -53,107 +53,113 @@ eligible_df = filtered_df[
 eligible_cnic = eligible_df["PLW CNIC No"].nunique()
 eligible_amount = eligible_df["Amount (Rs.)"].sum()
 
-st.title("📊 PLW Dashboard")
-col1, col2, col3 = st.columns(3)
-col1.metric("Total PLWs (CNIC)", total_cnic)
-col2.metric("Withdrawn PLWs", withdrawn_cnic)
-col3.metric("Incentive Eligible (CNIC)", eligible_cnic)
+# --- Summary Section ---
+st.title("📊 PLW Dashboard Summary")
+c1, c2, c3 = st.columns(3)
+c4, c5, c6 = st.columns(3)
 
-st.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
-st.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
+c1.metric("Total PLWs (CNIC)", f"{total_cnic:,}")
+c2.metric("Withdrawn PLWs", f"{withdrawn_cnic:,}")
+c3.metric("Incentive Eligible (CNIC)", f"{eligible_cnic:,}")
 
-# Pie Charts
-st.subheader("📌 PLW Engagement Overview")
-c1, c2 = st.columns(2)
+c4.metric("Not Withdrawn", f"{not_withdrawn:,}")
+c5.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
+c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 
-def plot_pie(col_data, title):
-    labels = col_data.index.tolist()
-    sizes = col_data.values
-    fig, ax = plt.subplots(figsize=(4, 4))
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%.1f%%', startangle=90,
-                                      textprops={'color':'white', 'fontsize':10}, colors=["darkgreen", "darkred"])
-    ax.legend([f"{label} ({val:,})" for label, val in zip(labels, sizes)], loc="upper left", bbox_to_anchor=(1, 1))
-    ax.set_title(title, fontsize=13)
+# --- Pie Charts ---
+def pie_chart(data, labels, title, colors):
+    fig, ax = plt.subplots(figsize=(4, 3))
+    wedges, texts, autotexts = ax.pie(
+        data,
+        labels=None,
+        startangle=90,
+        autopct=lambda p: f"{int(p * sum(data) / 100):,}, {int(p)}%",
+        colors=colors,
+        textprops={"color": "white", "fontsize": 10}
+    )
+    ax.legend([f"{lbl}" for lbl in labels], loc="upper left", bbox_to_anchor=(1, 1))
+    ax.set_title(title)
+    return fig
+
+st.subheader("🔄 PLW Engagement Overview")
+col1, col2 = st.columns(2)
+
+with col1:
+    contact_counts = filtered_df["Contact with PLW (Y/N)"].value_counts()
+    fig = pie_chart(contact_counts.values, contact_counts.index, "Contact with PLW", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
-with c1:
-    plot_pie(filtered_df["Contact with PLW (Y/N)"].value_counts(), "Contact with PLW")
-with c2:
-    plot_pie(filtered_df["PLW visited the Campsite"].value_counts(), "PLW Visited Campsite")
+with col2:
+    visit_counts = filtered_df["PLW visited the Campsite"].value_counts()
+    fig = pie_chart(visit_counts.values, visit_counts.index, "Visited Camp", ["darkgreen", "darkred"])
+    st.pyplot(fig)
 
-# Horizontal Bar: PLW Status
-st.subheader("🧭 PLW Status")
+# --- PLW Status Horizontal Bar ---
+st.subheader("👤 PLW Status")
 status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
 fig, ax = plt.subplots(figsize=(6, 3))
-bars = ax.barh(status_counts.index, status_counts.values, color='teal')
+bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colors)
 for bar in bars:
-    ax.text(bar.get_width() + 5, bar.get_y() + bar.get_height()/2,
-            f"{bar.get_width():.0f}", va='center', fontsize=9)
-ax.set_xlabel("Count")
+    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
+            ha="right", va="center", color="white", fontsize=9)
 st.pyplot(fig)
 
-# Pie: Withdrawal Count
-st.subheader("💸 Withdrawal Count")
-withdraw_vals = [withdrawn_cnic, not_withdrawn]
-labels = ["Withdrawn", "Not Withdrawn"]
-colors = ["darkgreen", "darkred"]
-fig, ax = plt.subplots(figsize=(4, 4))
-wedges, texts, autotexts = ax.pie(withdraw_vals, autopct='%.1f%%', colors=colors, textprops={'color':"white"})
-ax.legend([f"{lbl} ({val:,})" for lbl, val in zip(labels, withdraw_vals)], loc="upper left", bbox_to_anchor=(1, 1))
+# --- Withdrawal Pie Chart ---
+st.subheader("💸 Withdrawn Count")
+fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal", ["darkgreen", "darkred"])
 st.pyplot(fig)
 
-# ADFO Withdrawal %
-st.subheader("📉 ADFO-wise Withdrawal %")
+# --- ADFO-wise Withdrawal % ---
+st.subheader("📈 ADFO-wise Withdrawal %")
 group = filtered_df.groupby("ADFO Name")
-withdraw_pct = (filtered_df[filtered_df["Amount withdrawn from Camp (Rs.)"] > 0]
-                .groupby("ADFO Name")["PLW CNIC No"]
-                .nunique() / group["PLW CNIC No"].nunique() * 100).fillna(0)
+total_by_adfo = group["PLW CNIC No"].nunique()
+withdraw_by_adfo = filtered_df[filtered_df["Amount withdrawn from Camp (Rs.)"] > 0].groupby("ADFO Name")["PLW CNIC No"].nunique()
+withdraw_pct = (withdraw_by_adfo / total_by_adfo * 100).fillna(0)
 
-fig, ax = plt.subplots(figsize=(7, 3))
+fig, ax = plt.subplots(figsize=(9, 4))
 labels = ['\n'.join(textwrap.wrap(label, 12)) for label in withdraw_pct.index]
 bars = ax.bar(labels, withdraw_pct.values, color=plt.cm.Paired.colors)
 for bar in bars:
     height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2, height + 1, f"{int(height)}%", ha="center", fontsize=8)
+    ax.text(bar.get_x() + bar.get_width()/2, height - 5, f"{int(height)}%", ha="center", va="top", color="white", fontsize=9)
 ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
-# Benchmark vs Withdrawn
-st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
+# --- Benchmark vs Withdrawn (Max) ---
+st.subheader("📊 ADFO: Benchmark vs Withdrawn")
 benchmark = group["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
-withdraw = group["Amount withdrawn from Camp (Rs.)"].sum()
-fig, ax = plt.subplots(figsize=(8, 4))
+withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
 x = np.arange(len(benchmark))
-w = 0.35
 labels = ['\n'.join(textwrap.wrap(label, 10)) for label in benchmark.index]
 
-b1 = ax.bar(x - w/2, benchmark.values, w, label="Benchmark", color="darkgreen")
-b2 = ax.bar(x + w/2, withdraw.values, w, label="Withdrawn", color="darkred")
-for bars in [b1, b2]:
-    for bar in bars:
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 500, f"{int(bar.get_height()):,}",
-                ha="center", fontsize=8)
+fig, ax = plt.subplots(figsize=(10, 4))
+bar1 = ax.bar(x - 0.2, benchmark.values, 0.4, label="Benchmark", color="darkgreen")
+bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred")
 
+for bars in [bar1, bar2]:
+    for bar in bars:
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() - 300, f"{int(bar.get_height()):,}",
+                ha="center", color="white", fontsize=8)
 ax.set_xticks(x)
-ax.set_xticklabels(labels, rotation=0)
+ax.set_xticklabels(labels)
 ax.set_ylabel("Rs.")
 ax.legend()
 st.pyplot(fig)
 
-# Reason for Non-Withdrawal - horizontal bar
+# --- Reason for Non-Withdrawal ---
 st.subheader("📌 Reason for Non-Withdrawal")
-reasons = filtered_df["Reason for non-withdrawal"].value_counts()
-wrapped = ['\n'.join(textwrap.wrap(r, 20)) for r in reasons.index]
+reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
+labels = ['\n'.join(textwrap.wrap(label, 20)) for label in reason_counts.index]
 fig, ax = plt.subplots(figsize=(8, 4))
-bars = ax.barh(wrapped, reasons.values, color='darkred')
+bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
 for bar in bars:
-    ax.text(bar.get_width() + 3, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width())}",
-            va="center", fontsize=8)
+    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
+            ha="right", va="center", color="black", fontsize=8)
 ax.set_xlabel("PLWs")
 st.pyplot(fig)
 
-# Table
-st.subheader("📋 Filtered Data")
+# --- Data Table + Export ---
+st.subheader("📋 Filtered Data Table")
 st.dataframe(filtered_df)
 csv = filtered_df.to_csv(index=False).encode("utf-8")
 st.download_button("⬇️ Download CSV", csv, "filtered_data.csv", "text/csv")
