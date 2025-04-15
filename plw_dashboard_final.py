@@ -175,7 +175,7 @@ st.pyplot(fig)
 # --- Reason for Non-Withdrawal ---
 st.subheader("📌 Reason for Non-Withdrawal")
 reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
-labels = ['\n'.join(textwrap.wrap(label, 12)) for label in reason_counts.index]
+labels = ['\n'.join(textwrap.wrap(label, 20)) for label in reason_counts.index]
 fig, ax = plt.subplots(figsize=(8, 4))
 bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
 for bar in bars:
