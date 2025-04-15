@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import textwrap
-from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import numpy as np
 
