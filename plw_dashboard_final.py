@@ -139,6 +139,10 @@ bars = ax.bar(labels, withdraw_pct.values, color=plt.cm.Paired.colors)
 for bar in bars:
     height = bar.get_height()
     ax.text(bar.get_x() + bar.get_width()/2, height - 4, f"{int(height)}%", ha="center", va="top", color="white", fontsize=9)
+
+ax.set_xticks(x)
+ax.set_xticklabels(labels)
+ax.tick_params(axis='x', labelsize=10)
 ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
@@ -162,7 +166,7 @@ for bars in [bar1, bar2]:
 
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
-ax.tick_params(axis='x', labelsize=8)
+ax.tick_params(axis='x', labelsize=10)
 
 ax.legend()
 st.pyplot(fig)
