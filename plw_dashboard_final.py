@@ -28,7 +28,7 @@ for col in df.select_dtypes(include='object'):
 
 # Filters
 st.sidebar.header("Filter Data")
-districts = st.sidebar.multiselect("Select District(s)", options=df['district'].unique(), default=df['district'].unique())
+districts = st.sidebar.multiselect("Select District", options=df['district'].unique(), default=df['district'].unique())
 statuses = st.sidebar.multiselect("Select PLW Status", options=df['status of plw (nwd or pwd)'].unique(), default=df['status of plw (nwd or pwd)'].unique())
 df_filtered = df[df['district'].isin(districts) & df['status of plw (nwd or pwd)'].isin(statuses)]
 
