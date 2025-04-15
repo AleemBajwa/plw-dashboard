@@ -13,7 +13,7 @@ st.markdown("""
             width: 150px !important;  /* Adjust as needed */
         }
         [data-testid="stSidebarContent"] {
-            padding: 10rem;
+            padding: 0.5rem;
         }
     </style>
 """, unsafe_allow_html=True)
