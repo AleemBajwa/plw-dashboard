@@ -166,13 +166,14 @@ bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred"
 for bars in [bar1, bar2]:
     for bar in bars:
         label_height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2, label_height - (0.05 * label_height),  # slightly below top
+        ax.text(bar.get_x() + bar.get_width()/2, label_height - (0.03 * label_height),  # slightly below top
                 f"{int(label_height):,}", ha="center", va="top", color="white", fontsize=10, rotation=90)
 
 
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
 ax.tick_params(axis='x', labelsize=10)
+ax.tick_params(axis='y', labelsize=10)
 
 ax.legend()
 st.pyplot(fig)
