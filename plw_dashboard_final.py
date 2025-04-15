@@ -6,45 +6,6 @@ import textwrap
 
 st.set_page_config(page_title="PLW Dashboard", layout="wide")
 
-st.markdown("""
-    <style>
-        /* Shrink sidebar width */
-        [data-testid="stSidebar"] {
-            width: 260px !important;
-        }
-        [data-testid="stSidebarContent"] {
-            padding: 1rem;
-        }
-
-        /* Reduce font size for sidebar widgets */
-        .css-1v0mbdj, .css-qbe2hs, .st-emotion-cache-16idsys p, label, span, .stSelectbox label {
-            font-size: 13px !important;
-        }
-
-        /* Smaller font inside dropdowns */
-        .stSelectbox div[data-baseweb="select"] {
-            font-size: 12px !important;
-        }
-
-        /* Calendar date picker font sizes */
-        .css-1c7y2kd, .css-1n76uvr, .css-1hynsf2 {
-            font-size: 10px !important;
-        }
-
-        /* Calendar day numbers */
-        .css-1n76uvr {
-            font-size: 10px !important;
-        }
-
-        /* Month and year selector */
-        .css-1c7y2kd {
-            font-size: 10px !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-
-
 @st.cache_data(ttl=300)
 def load_data():
     url = "https://docs.google.com/spreadsheets/d/1cGRESCZ3ShFOF4yzvGdjopUeMRL2Uyk9tWdbg2P63FA/export?format=xlsx"
