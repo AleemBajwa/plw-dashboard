@@ -74,9 +74,9 @@ def pie_chart(data, labels, title, colors):
     wedges, texts = ax.pie(
         data,
         labels=display_labels,
-        startangle=00,
+        startangle=75,
         colors=colors,
-        labeldistance=0.1,  # bring labels inward
+        labeldistance=0.0,  # bring labels inward
         textprops={"color": "white", "fontsize": 10}
     )
     ax.set_title(title)
