@@ -22,7 +22,6 @@ def load_data():
 
 df = load_data()
 
-# Filters
 st.sidebar.title("🔘 Filters")
 districts = ["All"] + sorted(df["District"].dropna().unique())
 adfos = ["All"] + sorted(df["ADFO Name"].dropna().unique())
@@ -69,13 +68,12 @@ with col3:
     st.metric("Eligible for Incentive (CNIC)", f"{eligible_cnic}")
     st.metric("Incentive Amount (Rs.)", f"Rs. {int(eligible_amount):,}")
 
-# Visual: Reason for Non-withdrawal
+# Reason for Non-withdrawal
 st.markdown("### ❌ Reason for Non-Withdrawal")
 reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
 reasons = reason_counts.index.tolist()
 values = reason_counts.values.tolist()
-wrapped_labels = ['
-'.join(textwrap.wrap(label, 12)) for label in reasons]
+wrapped_labels = ['\n'.join(textwrap.wrap(label, 12)) for label in reasons]
 fig1, ax1 = plt.subplots(figsize=(10, 5))
 bars = ax1.bar(wrapped_labels, values, color="darkred")
 for bar in bars:
@@ -86,7 +84,7 @@ ax1.set_ylabel("PLWs")
 plt.xticks(rotation=0)
 st.pyplot(fig1)
 
-# Visual: ADFO Benchmark vs Actual
+# ADFO Benchmark vs Actual
 st.markdown("### 💰 ADFO-wise Benchmark vs Actual Withdrawn (Rs.)")
 grouped = filtered_df.groupby("ADFO Name")
 benchmark = grouped["ADFO Benchmark: Withdrawal / Camp (Rs.)"].sum()
@@ -98,8 +96,7 @@ fig2, ax2 = plt.subplots(figsize=(10, 5))
 cmap = get_cmap("tab10")
 bench_colors = [cmap(i) for i in range(len(x))]
 withd_colors = [cmap(i + 5) for i in range(len(x))]
-wrapped_labels = ['
-'.join(textwrap.wrap(label, 12)) for label in labels]
+wrapped_labels = ['\n'.join(textwrap.wrap(label, 12)) for label in labels]
 bench_bars = ax2.bar(x, benchmark.values, width=bar_width, label="Benchmark", color=bench_colors)
 withd_bars = ax2.bar([i + bar_width for i in x], withdrawn_amt.values, width=bar_width, label="Withdrawn", color=withd_colors)
 for bar in bench_bars + withd_bars:
@@ -112,7 +109,7 @@ ax2.set_ylabel("Rs.")
 ax2.legend()
 st.pyplot(fig2)
 
-# Final Table
+# Table
 st.markdown("### 📋 Filtered Data Table")
 st.dataframe(filtered_df)
 csv = filtered_df.to_csv(index=False).encode("utf-8")
