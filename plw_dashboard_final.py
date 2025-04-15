@@ -143,6 +143,12 @@ ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
 # --- Benchmark vs Withdrawn (Max) ---
+st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
+benchmark = group["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
+withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
+labels = ['\n'.join(textwrap.wrap(label, 10)) for label in benchmark.index]
+x = np.arange(len(benchmark))  # <-- This is the missing line
+
 fig, ax = plt.subplots(figsize=(10, 4))
 bar1 = ax.bar(x - 0.2, benchmark.values, 0.4, label="Benchmark", color="darkgreen")
 bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred")
@@ -154,11 +160,11 @@ for bars in [bar1, bar2]:
 
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
-ax.legend()
-ax.set_ylabel("Rs.")
 ax.spines['left'].set_visible(False)
 ax.tick_params(axis='y', left=False, labelleft=False)
+ax.legend()
 st.pyplot(fig)
+
 
 
 # --- Reason for Non-Withdrawal ---
