@@ -181,7 +181,7 @@ bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
 ax.tick_params(axis='y', labelsize=8)
 
 for bar in bars:
-    ax.text(bar.get_width() + 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
+    ax.text(bar.get_width() + 10, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
             ha="right", va="center", color="black", fontsize=8)
 ax.set_xlabel("PLWs")
 st.pyplot(fig)
