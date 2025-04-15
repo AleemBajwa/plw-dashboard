@@ -14,7 +14,7 @@ df = df.applymap(lambda x: x.lower().strip() if isinstance(x, str) else x)
 
 # Fix numeric conversions
 df['Amount (Rs.)'] = pd.to_numeric(df['Amount (Rs.)'], errors='coerce').fillna(0)
-df['Incentive'] = pd.to_numeric(df['Incentive'], errors='coerce').fillna(0)
+df['Eligible for Incentive'] = pd.to_numeric(df['Eligible for Incentive'], errors='coerce').fillna(0)
 
 # Sidebar Filters
 st.sidebar.header("Filter Data")
