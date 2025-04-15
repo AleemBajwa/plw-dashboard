@@ -187,6 +187,7 @@ labels = ['\n'.join(textwrap.wrap(label, 20)) for label in reason_counts.index]
 fig, ax = plt.subplots(figsize=(8, 4))
 bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
 ax.tick_params(axis='y', labelsize=8)
+ax.tick_params(axis='x', labelsize=8)
 
 for bar in bars:
     ax.text(bar.get_width() + 10, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
