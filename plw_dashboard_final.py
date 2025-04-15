@@ -53,78 +53,58 @@ eligible_df = filtered_df[
 eligible_cnic = eligible_df["PLW CNIC No"].nunique()
 eligible_amount = eligible_df["Amount (Rs.)"].sum()
 
-# Summary
+# --- Summary Section ---
 st.title("📊 PLW Dashboard Summary")
 c1, c2, c3 = st.columns(3)
 c4, c5, c6 = st.columns(3)
+
 c1.metric("Total PLWs (CNIC)", f"{total_cnic:,}")
 c2.metric("Withdrawn PLWs", f"{withdrawn_cnic:,}")
 c3.metric("LHWs Eligible for Incentive", f"{eligible_cnic:,}")
+
 c4.metric("Not Withdrawn", f"{not_withdrawn:,}")
 c5.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
 c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 
-# Pie Chart Function
-def pie_chart(data, title, colors):
-    fig, ax = plt.subplots(figsize=(3, 3))
-    total = sum(data)
+# --- Pie Charts ---
+def pie_chart(data, labels, title, colors, size=(3.2, 3.2)):
+    fig, ax = plt.subplots(figsize=size)
     wedges, texts, autotexts = ax.pie(
         data,
-        startangle=90,
-        colors=colors,
         labels=None,
-        autopct=lambda p: f"{int(round(p * total / 100)):,}, {int(round(p))}%",
-        textprops={'color': 'white', 'fontsize': 9}
+        startangle=90,
+        autopct=lambda p: f"{int(p * sum(data) / 100):,}, {int(p)}%",
+        colors=colors,
+        textprops={"color": "white", "fontsize": 10}
     )
     ax.set_title(title)
     return fig
 
-# Engagement Section
 st.subheader("🔄 PLW Engagement Overview")
-col1, col2, col3 = st.columns([1, 1, 1])
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    contact_vals = filtered_df["Contact with PLW (Y/N)"].value_counts()
-    fig = pie_chart(contact_vals.values, contact_vals.index, "Contact with PLW", ["darkgreen", "darkred"])
+    contact_counts = filtered_df["Contact with PLW (Y/N)"].value_counts()
+    fig = pie_chart(contact_counts.values, contact_counts.index, "Contact with PLW", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
 with col2:
-    camp_vals = filtered_df["PLW visited the Campsite"].value_counts()
-    fig = pie_chart(camp_vals.values, camp_vals.index, "Visited Camp", ["darkgreen", "darkred"])
+    visit_counts = filtered_df["PLW visited the Campsite"].value_counts()
+    fig = pie_chart(visit_counts.values, visit_counts.index, "Visited Camp", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
 with col3:
     fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal Count", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
-# ADFO Benchmark vs Withdrawn
-st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
-group = filtered_df.groupby("ADFO Name")
-benchmark = group["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
-withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
-x = np.arange(len(benchmark))
-labels = ['\n'.join(textwrap.wrap(label, 10)) for label in benchmark.index]
-fig, ax = plt.subplots(figsize=(9, 4))
-b1 = ax.bar(x - 0.2, benchmark.values, width=0.4, label="Benchmark", color="darkgreen")
-b2 = ax.bar(x + 0.2, withdrawn.values, width=0.4, label="Withdrawn", color="darkred")
-for bar in b1 + b2:
-    height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2, height + 2000, f"{int(height):,}", ha='center', va='bottom', fontsize=8, rotation=90)
-ax.set_xticks(x)
-ax.set_xticklabels(labels)
-ax.set_ylabel("Rs.")
-ax.legend()
-st.pyplot(fig)
-# --- Reason for Non-Withdrawal ---
-st.subheader("📌 Reason for Non-Withdrawal")
-reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
-wrapped_labels = ['\n'.join(textwrap.wrap(label, 25)) for label in reason_counts.index]
-fig, ax = plt.subplots(figsize=(8, 4))
-bars = ax.barh(wrapped_labels, reason_counts.values, color="darkred")
+# --- PLW Status Horizontal Bar ---
+st.subheader("👤 PLW Status")
+status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
+fig, ax = plt.subplots(figsize=(6, 3))
+bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colors)
 for bar in bars:
     ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
-            ha="right", va="center", color="white", fontsize=8)
-ax.set_xlabel("PLWs")
+            ha="right", va="center", color="white", fontsize=9)
 st.pyplot(fig)
 
 # --- ADFO-wise Withdrawal % ---
@@ -143,18 +123,40 @@ for bar in bars:
 ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
-# --- PLW Status Chart ---
-st.subheader("👤 PLW Status")
-status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
-fig, ax = plt.subplots(figsize=(6, 3))
-bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colors)
-for bar in bars:
-    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
-            ha="right", va="center", color="black", fontsize=9)
-ax.set_xlabel("Count")
+# --- Benchmark vs Withdrawn (Max) ---
+st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
+benchmark = group["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
+withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
+x = np.arange(len(benchmark))
+labels = ['\n'.join(textwrap.wrap(label, 10)) for label in benchmark.index]
+
+fig, ax = plt.subplots(figsize=(10, 4))
+bar1 = ax.bar(x - 0.2, benchmark.values, 0.4, label="Benchmark", color="darkgreen")
+bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred")
+
+for bars in [bar1, bar2]:
+    for bar in bars:
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2000, f"{int(bar.get_height()):,}",
+                ha="center", color="black", fontsize=8, rotation=90)
+ax.set_xticks(x)
+ax.set_xticklabels(labels)
+ax.set_ylabel("Rs.")
+ax.legend()
 st.pyplot(fig)
 
-# --- Data Table ---
+# --- Reason for Non-Withdrawal ---
+st.subheader("📌 Reason for Non-Withdrawal")
+reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
+labels = ['\n'.join(textwrap.wrap(label, 20)) for label in reason_counts.index]
+fig, ax = plt.subplots(figsize=(8, 4))
+bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
+for bar in bars:
+    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
+            ha="right", va="center", color="black", fontsize=8)
+ax.set_xlabel("PLWs")
+st.pyplot(fig)
+
+# --- Data Table + Export ---
 st.subheader("📋 Filtered Data Table")
 st.dataframe(filtered_df)
 csv = filtered_df.to_csv(index=False).encode("utf-8")
