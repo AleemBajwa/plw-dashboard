@@ -119,12 +119,12 @@ st.markdown("""
 # --- PLW Status Horizontal Bar ---
 st.subheader("👤 PLW Status")
 status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
-fig, ax = plt.subplots(figsize=(7, 2))
+fig, ax = plt.subplots(figsize=(9, 2))
 bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colors)
 ax.tick_params(axis='y', labelsize=8)
 
 for bar in bars:
-    ax.text(bar.get_width() + 15, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
+    ax.text(bar.get_width() + 25, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
             ha="right", va="center", color="black", fontsize=9)
 st.pyplot(fig)
 
