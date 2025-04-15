@@ -69,7 +69,7 @@ c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 # --- Pie Charts ---
 def pie_chart(data, labels, title, colors, size=(3.2, 3.2)):
     fig, ax = plt.subplots(figsize=size)
-    wedges, texts, autotexts = ax.pie(
+    wedges, texts = ax.pie(
         data,
         labels=None,
         startangle=90,
