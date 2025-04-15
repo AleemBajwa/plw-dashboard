@@ -43,7 +43,6 @@ if len(date_range) == 2:
     start_date, end_date = pd.to_datetime(date_range)
     filtered_df = filtered_df[(filtered_df["Date of Camp"] >= start_date) & (filtered_df["Date of Camp"] <= end_date)]
 
-# Metrics
 total_cnic = filtered_df["PLW CNIC No"].nunique()
 withdrawn_cnic = filtered_df[filtered_df["Amount withdrawn from Camp (Rs.)"] > 0]["PLW CNIC No"].nunique()
 not_withdrawn = total_cnic - withdrawn_cnic
@@ -68,46 +67,94 @@ with col3:
     st.metric("Eligible for Incentive (CNIC)", f"{eligible_cnic}")
     st.metric("Incentive Amount (Rs.)", f"Rs. {int(eligible_amount):,}")
 
-# Reason for Non-withdrawal
-st.markdown("### ❌ Reason for Non-Withdrawal")
-reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
-reasons = reason_counts.index.tolist()
-values = reason_counts.values.tolist()
-wrapped_labels = ['\n'.join(textwrap.wrap(label, 12)) for label in reasons]
-fig1, ax1 = plt.subplots(figsize=(10, 5))
-bars = ax1.bar(wrapped_labels, values, color="darkred")
-for bar in bars:
-    height = bar.get_height()
-    ax1.annotate(f"{int(height)}", xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, 3),
-                 textcoords="offset points", ha='center', fontsize=9)
-ax1.set_ylabel("PLWs")
-plt.xticks(rotation=0)
-st.pyplot(fig1)
+# Bar: Withdrawal status
+fig, ax = plt.subplots(figsize=(5, 3))
+vals = [withdrawn_cnic, not_withdrawn]
+lbls = ["Withdrawn", "Not Withdrawn"]
+colors = ["darkgreen", "darkred"]
+ax.bar(lbls, vals, color=colors)
+for i, v in enumerate(vals):
+    ax.text(i, v + 2, str(v), ha='center')
+st.pyplot(fig)
 
-# ADFO Benchmark vs Actual
-st.markdown("### 💰 ADFO-wise Benchmark vs Actual Withdrawn (Rs.)")
+# Pie: Contact with PLW
+contact_counts = filtered_df["Contact with PLW (Y/N)"].value_counts()
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.pie(contact_counts, labels=[f"{k} ({v})" for k, v in contact_counts.items()], colors=["darkgreen", "darkred"])
+ax.axis("equal")
+st.pyplot(fig)
+
+# Pie: PLW Visited Campsite
+visit_counts = filtered_df["PLW visited the Campsite"].value_counts()
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.pie(visit_counts, labels=[f"{k} ({v})" for k, v in visit_counts.items()], colors=["darkgreen", "darkred"])
+ax.axis("equal")
+st.pyplot(fig)
+
+# Bar: ADFO-wise Withdrawal %
 grouped = filtered_df.groupby("ADFO Name")
-benchmark = grouped["ADFO Benchmark: Withdrawal / Camp (Rs.)"].sum()
+total_by_adfo = grouped["PLW CNIC No"].nunique()
+withdraw_by_adfo = filtered_df[filtered_df["Amount withdrawn from Camp (Rs.)"] > 0].groupby("ADFO Name")["PLW CNIC No"].nunique()
+withdraw_pct = (withdraw_by_adfo / total_by_adfo * 100).fillna(0)
+
+fig, ax = plt.subplots(figsize=(6, 3))
+wrapped_labels = ['\n'.join(textwrap.wrap(label, 12)) for label in withdraw_pct.index]
+bars = ax.bar(wrapped_labels, withdraw_pct.values, color="teal")
+for bar in bars:
+    height = int(bar.get_height())
+    ax.text(bar.get_x() + bar.get_width()/2, height - 5, f"{height}%", ha="center", va="top", color="white")
+ax.set_ylabel("Withdrawal %")
+plt.xticks(rotation=0)
+st.pyplot(fig)
+
+# Bar: Benchmark vs Actual Withdrawn
+benchmark = grouped["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
 withdrawn_amt = grouped["Amount withdrawn from Camp (Rs.)"].sum()
 labels = benchmark.index.tolist()
 x = range(len(labels))
 bar_width = 0.4
-fig2, ax2 = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(6, 3))
 cmap = get_cmap("tab10")
 bench_colors = [cmap(i) for i in range(len(x))]
 withd_colors = [cmap(i + 5) for i in range(len(x))]
 wrapped_labels = ['\n'.join(textwrap.wrap(label, 12)) for label in labels]
-bench_bars = ax2.bar(x, benchmark.values, width=bar_width, label="Benchmark", color=bench_colors)
-withd_bars = ax2.bar([i + bar_width for i in x], withdrawn_amt.values, width=bar_width, label="Withdrawn", color=withd_colors)
+bench_bars = ax.bar(x, benchmark.values, width=bar_width, label="Benchmark", color=bench_colors)
+withd_bars = ax.bar([i + bar_width for i in x], withdrawn_amt.values, width=bar_width, label="Withdrawn", color=withd_colors)
 for bar in bench_bars + withd_bars:
     height = bar.get_height()
-    ax2.annotate(f"{int(height):,}", xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, 3),
-                 textcoords="offset points", ha='center', fontsize=8)
-ax2.set_xticks([i + bar_width / 2 for i in x])
-ax2.set_xticklabels(wrapped_labels, rotation=0)
-ax2.set_ylabel("Rs.")
-ax2.legend()
-st.pyplot(fig2)
+    ax.annotate(f"{int(height):,}", xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, 3),
+                textcoords="offset points", ha='center', fontsize=8)
+ax.set_xticks([i + bar_width / 2 for i in x])
+ax.set_xticklabels(wrapped_labels, rotation=0)
+ax.set_ylabel("Rs.")
+ax.legend()
+st.pyplot(fig)
+
+# Bar: Reason for Non-Withdrawal
+reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
+reasons = reason_counts.index.tolist()
+values = reason_counts.values.tolist()
+wrapped_labels = ['\n'.join(textwrap.wrap(label, 14)) for label in reasons]
+fig, ax = plt.subplots(figsize=(6, 3))
+bars = ax.bar(wrapped_labels, values, color="darkred")
+for bar in bars:
+    height = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2, height, str(height), ha="center", fontsize=8)
+ax.set_ylabel("PLWs")
+plt.xticks(rotation=0)
+st.pyplot(fig)
+
+# Bar: PLW Status (NWD/PWD)
+status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
+labels = status_counts.index.tolist()
+values = status_counts.values.tolist()
+fig, ax = plt.subplots(figsize=(5, 3))
+bars = ax.bar(labels, values, color="darkblue")
+for bar in bars:
+    height = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2, height, str(height), ha="center", fontsize=9)
+ax.set_ylabel("Count")
+st.pyplot(fig)
 
 # Table
 st.markdown("### 📋 Filtered Data Table")
