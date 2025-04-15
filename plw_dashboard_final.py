@@ -18,7 +18,7 @@ def load_data():
 
 df = load_data()
 
-# Filters
+# Sidebar Filters
 st.sidebar.title("🔘 Filters")
 districts = ["All"] + sorted(df["District"].dropna().unique())
 adfos = ["All"] + sorted(df["ADFO Name"].dropna().unique())
@@ -61,21 +61,22 @@ c4, c5, c6 = st.columns(3)
 c1.metric("Total PLWs (CNIC)", f"{total_cnic:,}")
 c2.metric("Withdrawn PLWs", f"{withdrawn_cnic:,}")
 c3.metric("Incentive Eligible (CNIC)", f"{eligible_cnic:,}")
+
 c4.metric("Not Withdrawn", f"{not_withdrawn:,}")
 c5.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
 c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
-
-# --- Pie Chart Helper ---
+# --- Pie Chart Function ---
 def pie_chart(data, labels, title, colors):
     fig, ax = plt.subplots(figsize=(4, 3))
     wedges, texts, autotexts = ax.pie(
         data,
-        labels=[f"{int(v):,}, {int((v/sum(data))*100)}%" for v in data],
         startangle=90,
+        autopct=lambda p: f"{int(p * sum(data) / 100):,}, {int(p)}%",
         colors=colors,
         textprops={"color": "white", "fontsize": 10}
     )
-    ax.set_title(title)
+    ax.set_title(title, fontsize=12)
+    ax.axis("equal")
     return fig
 
 # --- Pie Charts Section ---
@@ -92,17 +93,18 @@ with col2:
     fig = pie_chart(visit_counts.values, visit_counts.index, "Visited Camp", ["darkgreen", "darkred"])
     st.pyplot(fig)
 
-# --- PLW Status Horizontal Bar ---
+# --- PLW Status Horizontal Bar Chart ---
 st.subheader("👤 PLW Status")
 status_counts = filtered_df["Status of PLW (NWD or PWD)"].value_counts()
 fig, ax = plt.subplots(figsize=(6, 3))
 bars = ax.barh(status_counts.index, status_counts.values, color=plt.cm.Set2.colors)
 for bar in bars:
-    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
-            ha="right", va="center", color="white", fontsize=9)
+    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2,
+            f"{int(bar.get_width()):,}", ha="right", va="center", color="white", fontsize=9)
+ax.set_xlabel("Count")
 st.pyplot(fig)
 
-# --- Withdrawal Pie Chart ---
+# --- Withdrawal Count Pie Chart ---
 st.subheader("💸 Withdrawn Count")
 fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal", ["darkgreen", "darkred"])
 st.pyplot(fig)
@@ -123,8 +125,8 @@ for bar in bars:
 ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
-# --- Benchmark vs Withdrawn (Max) ---
-st.subheader("📊 ADFO: Benchmark vs Withdrawn")
+# --- ADFO Benchmark vs Withdrawn (Rs.) ---
+st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
 benchmark = group["ADFO Benchmark: Withdrawal / Camp (Rs.)"].max()
 withdrawn = group["Amount withdrawn from Camp (Rs.)"].sum()
 x = np.arange(len(benchmark))
@@ -136,8 +138,9 @@ bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred"
 
 for bars in [bar1, bar2]:
     for bar in bars:
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() - 300, f"{int(bar.get_height()):,}",
-                ha="center", color="white", fontsize=8)
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() - 300,
+                f"{int(bar.get_height()):,}", ha="center", va="top", color="white", fontsize=8)
+
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
 ax.set_ylabel("Rs.")
@@ -151,8 +154,8 @@ labels = ['\n'.join(textwrap.wrap(label, 20)) for label in reason_counts.index]
 fig, ax = plt.subplots(figsize=(8, 4))
 bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
 for bar in bars:
-    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
-            ha="right", va="center", color="black", fontsize=8)
+    ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2,
+            f"{int(bar.get_width()):,}", ha="right", va="center", color="black", fontsize=8)
 ax.set_xlabel("PLWs")
 st.pyplot(fig)
 
