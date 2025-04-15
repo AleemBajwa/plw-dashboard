@@ -155,8 +155,10 @@ bar2 = ax.bar(x + 0.2, withdrawn.values, 0.4, label="Withdrawn", color="darkred"
 
 for bars in [bar1, bar2]:
     for bar in bars:
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{int(bar.get_height()):,}",
-                ha="center", va="bottom", color="black", fontsize=8, rotation=90)
+        label_height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2, label_height - (0.05 * label_height),  # slightly below top
+                f"{int(label_height):,}", ha="center", va="top", color="white", fontsize=8, rotation=90)
+
 
 ax.set_xticks(x)
 ax.set_xticklabels(labels)
