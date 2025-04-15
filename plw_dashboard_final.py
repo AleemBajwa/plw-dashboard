@@ -6,6 +6,34 @@ import textwrap
 
 st.set_page_config(page_title="PLW Dashboard", layout="wide")
 
+st.markdown("""
+    <style>
+    /* Make sidebar wider to fit full calendar */
+    [data-testid="stSidebar"] {
+        width: 290px !important;
+    }
+
+    /* Reduce overall font size and padding */
+    [data-testid="stSidebar"] * {
+        font-size: 13px !important;
+    }
+
+    /* Tighten the calendar */
+    .stDateInput input {
+        font-size: 12px !important;
+    }
+
+    .css-1d391kg {  /* Streamlit's calendar container class */
+        padding: 0px 4px !important;
+    }
+
+    .css-1v0mbdj {  /* Streamlit's internal calendar layout */
+        font-size: 12px !important;
+    }
+
+    </style>
+""", unsafe_allow_html=True)
+
 @st.cache_data(ttl=300)
 def load_data():
     url = "https://docs.google.com/spreadsheets/d/1cGRESCZ3ShFOF4yzvGdjopUeMRL2Uyk9tWdbg2P63FA/export?format=xlsx"
