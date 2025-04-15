@@ -61,26 +61,24 @@ c4, c5, c6 = st.columns(3)
 c1.metric("Total PLWs (CNIC)", f"{total_cnic:,}")
 c2.metric("Withdrawn PLWs", f"{withdrawn_cnic:,}")
 c3.metric("Incentive Eligible (CNIC)", f"{eligible_cnic:,}")
-
 c4.metric("Not Withdrawn", f"{not_withdrawn:,}")
 c5.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
 c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 
-# --- Pie Charts ---
+# --- Pie Chart Helper ---
 def pie_chart(data, labels, title, colors):
     fig, ax = plt.subplots(figsize=(4, 3))
     wedges, texts, autotexts = ax.pie(
         data,
-        labels=None,
+        labels=[f"{int(v):,}, {int((v/sum(data))*100)}%" for v in data],
         startangle=90,
-        autopct=lambda p: f"{int(p * sum(data) / 100):,}, {int(p)}%",
         colors=colors,
         textprops={"color": "white", "fontsize": 10}
     )
-    ax.legend([f"{lbl}" for lbl in labels], loc="upper left", bbox_to_anchor=(1, 1))
     ax.set_title(title)
     return fig
 
+# --- Pie Charts Section ---
 st.subheader("🔄 PLW Engagement Overview")
 col1, col2 = st.columns(2)
 
