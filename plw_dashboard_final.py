@@ -10,7 +10,7 @@ st.set_page_config(page_title="PLW Dashboard", layout="wide")
 st.markdown("""
     <style>
         [data-testid="stSidebar"] {
-            width: 170px !important;  /* Adjust as needed */
+            width: 300px !important;  /* Adjust as needed */
         }
         [data-testid="stSidebarContent"] {
             padding: 2rem;
