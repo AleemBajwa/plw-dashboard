@@ -178,7 +178,7 @@ reason_counts = filtered_df["Reason for non-withdrawal"].value_counts()
 labels = ['\n'.join(textwrap.wrap(label, 20)) for label in reason_counts.index]
 fig, ax = plt.subplots(figsize=(8, 4))
 bars = ax.barh(labels, reason_counts.values, color=plt.cm.Set3.colors)
-ax.tick_params(axis='y', labelsize=10)
+ax.tick_params(axis='y', labelsize=8)
 
 for bar in bars:
     ax.text(bar.get_width() - 5, bar.get_y() + bar.get_height()/2, f"{int(bar.get_width()):,}",
