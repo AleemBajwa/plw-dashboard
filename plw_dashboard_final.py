@@ -6,6 +6,19 @@ import textwrap
 
 st.set_page_config(page_title="PLW Dashboard", layout="wide")
 
+# Custom CSS to shrink the sidebar
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            width: 150px !important;  /* Adjust as needed */
+        }
+        [data-testid="stSidebarContent"] {
+            padding: 1rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
 @st.cache_data(ttl=300)
 def load_data():
     url = "https://docs.google.com/spreadsheets/d/1cGRESCZ3ShFOF4yzvGdjopUeMRL2Uyk9tWdbg2P63FA/export?format=xlsx"
