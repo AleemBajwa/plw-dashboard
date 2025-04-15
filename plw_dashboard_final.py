@@ -1,8 +1,10 @@
+
 import streamlit as st
-st.set_page_config(layout="wide")  # 🔥 MUST be placed right after the import of Streamlit
+st.set_page_config(layout="wide")  # ✅ MUST be the first Streamlit command
+
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 from textwrap import wrap
 
 
