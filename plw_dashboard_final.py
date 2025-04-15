@@ -1,146 +1,140 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+from google.oauth2 import service_account
+import gspread
 import numpy as np
 import textwrap
 
-# Page config
-st.set_page_config(page_title="PLW Dashboard", layout="wide")
+# Google Sheet authentication
+credentials = service_account.Credentials.from_service_account_file(
+    "service_account.json",
+    scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"],
+)
+gc = gspread.authorize(credentials)
 
-# Google Sheet setup
-SHEET_ID = "1cGRESCZ3ShFOF4yzvGdjopUeMRL2Uyk9tWdbg2P63FA"
-SHEET_NAME = "Sheet1"
-url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
+# Load data
+spreadsheet = gc.open_by_url("https://docs.google.com/spreadsheets/d/1cGRESCZ3ShFOF4yzvGdjopUeMRL2Uyk9tWdbg2P63FA")
+worksheet = spreadsheet.sheet1
+data = worksheet.get_all_records()
+df = pd.DataFrame(data)
 
-@st.cache_data
-def load_data():
-    df = pd.read_csv(url)
-    df.columns = df.columns.str.strip()
-    for col in df.select_dtypes(include='object').columns:
-        df[col] = df[col].astype(str).str.strip().str.lower()
-    return df
+# Clean columns
+df.columns = df.columns.str.strip()
 
-df = load_data()
+# Handle case insensitivity
+df = df.applymap(lambda x: str(x).strip().lower() if isinstance(x, str) else x)
 
-# Filter
-with st.sidebar:
-    st.header("Filter Options")
-    districts = df["district"].dropna().unique()
-    selected_districts = st.multiselect("Select District", sorted(districts), default=sorted(districts))
-    status_list = df["status of plw (nwd or pwd)"].dropna().unique()
-    selected_status = st.multiselect("Select PLW Status", sorted(status_list), default=sorted(status_list))
-
-df_filtered = df[df["district"].isin(selected_districts) & df["status of plw (nwd or pwd)"].isin(selected_status)]
-
-# Summary
-total_plws = df_filtered["plw cnic no"].nunique()
-withdrawn_count = df_filtered[df_filtered["withdrawn plw"] == "yes"]["plw cnic no"].nunique()
-eligible_df = df_filtered[(df_filtered["eligible for incentive"] == "yes") & (df_filtered["plw unable to withdraw"] != "yes")]
-incentive_eligible = eligible_df["plw cnic no"].nunique()
-total_withdrawn = df_filtered[df_filtered["withdrawn plw"] == "yes"]["amount (rs.)"].sum()
-incentive_due = eligible_df["amount (rs.)"].sum()
-
+# Setup layout
+st.set_page_config(layout="wide")
 st.title("📊 PLW Dashboard")
+
+# Filters
+districts = sorted(df["District"].dropna().unique())
+statuses = sorted(df["Status of PLW (NWD or PWD)"].dropna().unique())
+
+col_filter1, col_filter2 = st.columns(2)
+selected_districts = col_filter1.multiselect("Select District(s)", districts, default=districts)
+selected_status = col_filter2.multiselect("Select PLW Status", statuses, default=statuses)
+
+# Apply filters
+filtered_df = df[
+    df["District"].isin(selected_districts) &
+    df["Status of PLW (NWD or PWD)"].isin(selected_status)
+]
+
+# Remove where PLW Unable to Withdraw is "yes"
+filtered_df = filtered_df[filtered_df["PLW Unable to Withdraw"] != "yes"]
+
+# Metric Calculations
+total_plws = filtered_df["CNIC"].nunique()
+withdrawn_df = filtered_df[filtered_df["Withdrawn (Yes/No)"] == "yes"]
+withdrawn_count = withdrawn_df["CNIC"].nunique()
+eligible_df = filtered_df[filtered_df["Eligible for Incentive"] == "yes"]
+eligible_count = eligible_df["CNIC"].nunique()
+withdrawn_amount = withdrawn_df["Amount (Rs.)"].sum()
+incentive_due = eligible_df["Amount (Rs.)"].sum()
+
+# Display Metrics
 col1, col2, col3 = st.columns(3)
 col1.metric("Total PLWs (CNIC)", f"{total_plws:,}")
 col2.metric("Withdrawn PLWs", f"{withdrawn_count:,}")
-col3.metric("Incentive Eligible (CNIC)", f"{incentive_eligible:,}")
+col3.metric("Incentive Eligible (CNIC)", f"{eligible_count:,}")
 
 col4, col5 = st.columns(2)
-col4.metric("Total Withdrawn (Rs.)", f"{total_withdrawn:,.0f}")
-col5.metric("Incentive Due (Rs.)", f"{incentive_due:,.0f}")
+col4.metric("Total Withdrawn (Rs.)", f"{int(withdrawn_amount):,}")
+col5.metric("Incentive Due (Rs.)", f"{int(incentive_due):,}")
 
-# Pie Chart Function
-def plot_pie(data, title, labels_map):
-    counts = data.value_counts()
-    labels = [f"{labels_map.get(k, k)} ({v:,}, {v / counts.sum():.0%})" for k, v in counts.items()]
+# Pie Chart Helper
+def plot_pie(title, data, labels_map):
+    values = data.value_counts()
     colors = ['darkgreen', 'darkred']
+    labels = [f"{values[i]:,}, {int(values[i]/values.sum()*100)}%" for i in values.index]
     fig, ax = plt.subplots()
-    wedges, texts = ax.pie(
-        counts,
-        colors=colors[:len(counts)],
-        startangle=90,
-        wedgeprops=dict(width=0.4)
-    )
-    for i, (wedge, count) in enumerate(zip(wedges, counts)):
-        angle = (wedge.theta2 + wedge.theta1) / 2
-        x = 0.65 * np.cos(np.deg2rad(angle))
-        y = 0.65 * np.sin(np.deg2rad(angle))
-        ax.text(x, y, f"{count:,}, {count / counts.sum():.0%}", ha='center', va='center', color='white', fontsize=12)
+    wedges, texts = ax.pie(values, colors=colors, labels=labels, textprops={'color':"white"})
     ax.set_title(title)
-    ax.axis('equal')
     return fig
 
-# Engagement Charts
-st.subheader("🔄 PLW Engagement Overview")
-c1, c2 = st.columns(2)
-with c1:
-    fig1 = plot_pie(df_filtered["contact with plw"], "Contact with PLW", {"yes": "Yes", "no": "No"})
-    st.pyplot(fig1)
+# Pie Charts
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("📌 PLW Engagement Overview")
+    st.pyplot(plot_pie("Contact with PLW", filtered_df["Contact with PLW"], {"yes": "Yes", "no": "No"}))
 
-with c2:
-    fig2 = plot_pie(df_filtered["plw visited campsite"], "Visited Camp", {"yes": "Yes", "no": "No"})
-    st.pyplot(fig2)
+with col2:
+    st.pyplot(plot_pie("Visited Camp", filtered_df["PLW Visited Campsite"], {"yes": "Yes", "no": "No"}))
 
 # Withdrawal Pie
-st.subheader("💳 Withdrawn Count")
-withdrawal_pie = df_filtered["withdrawn plw"].apply(lambda x: "Withdrawn" if x == "yes" else "Not Withdrawn")
-fig3 = plot_pie(withdrawal_pie, "Withdrawal", {"Withdrawn": "Withdrawn", "Not Withdrawn": "Not Withdrawn"})
-st.pyplot(fig3)
+st.subheader("💸 Withdrawn Count")
+withdrawal_fig = plot_pie("Withdrawal", filtered_df["Withdrawn (Yes/No)"], {"yes": "Withdrawn", "no": "Not Withdrawn"})
+st.pyplot(withdrawal_fig)
 
-# ADFO-wise Benchmark vs Actual
-st.subheader("📊 ADFO: Benchmark vs Withdrawn")
-df_filtered["amount (rs.)"] = pd.to_numeric(df_filtered["amount (rs.)"], errors='coerce').fillna(0)
-benchmark = df_filtered.groupby("adfo name")["benchmark: withdrawal / camp (rs.)"].max()
-actual = df_filtered.groupby("adfo name")["amount (rs.)"].sum()
-bar_df = pd.DataFrame({"Benchmark": benchmark, "Withdrawn": actual}).dropna()
+# Bar Chart: ADFO-wise Withdrawal %
+st.subheader("📉 ADFO-wise Withdrawal %")
+grouped = filtered_df.groupby("ADFO Name")
+withdrawal_pct = (grouped["Withdrawn (Yes/No)"].apply(lambda x: (x == "yes").sum() / len(x)) * 100).round(0)
+withdrawal_pct = withdrawal_pct.sort_values(ascending=False)
 
-fig4, ax4 = plt.subplots()
-bar_df.plot(kind="bar", ax=ax4, color=["darkgreen", "darkred"], width=0.75)
-for idx, row in bar_df.iterrows():
-    ax4.text(idx, row["Benchmark"], f"{int(row['Benchmark']):,}", ha="center", va="bottom", fontsize=9)
-    ax4.text(idx, row["Withdrawn"], f"{int(row['Withdrawn']):,}", ha="center", va="top", fontsize=9)
-ax4.set_ylabel("Rs.")
-ax4.set_xticklabels(bar_df.index, rotation=45, ha="right")
-ax4.legend()
-st.pyplot(fig4)
+fig, ax = plt.subplots()
+colors = plt.cm.tab20.colors
+withdrawal_pct.plot(kind="bar", ax=ax, color=colors)
+ax.set_ylabel("Withdrawal %")
+ax.set_ylim(0, 100)
+for i, v in enumerate(withdrawal_pct):
+    ax.text(i, v + 1, f"{int(v)}%", ha='center')
+plt.xticks(rotation=45, ha='right')
+st.pyplot(fig)
 
-# ADFO-wise Withdrawal %
-st.subheader("📈 ADFO-wise Withdrawal %")
-withdrawn_df = df_filtered.copy()
-withdrawn_df["withdrawn_flag"] = withdrawn_df["withdrawn plw"] == "yes"
-withdrawn_percent = withdrawn_df.groupby("adfo name")["withdrawn_flag"].mean().sort_values(ascending=False) * 100
+# Bar Chart: Benchmark vs Withdrawn (Rs.)
+st.subheader("📊 ADFO: Benchmark vs Withdrawn (Rs.)")
+benchmark_df = filtered_df.groupby("ADFO Name").agg({
+    "Benchmark: Withdrawal / Camp (Rs.)": "max",
+    "Amount withdrawn from Camp (Rs.)": "sum"
+})
+fig2, ax2 = plt.subplots()
+x = np.arange(len(benchmark_df))
+width = 0.35
+bar1 = ax2.bar(x - width/2, benchmark_df.iloc[:, 0], width, label='Benchmark', color='darkgreen')
+bar2 = ax2.bar(x + width/2, benchmark_df.iloc[:, 1], width, label='Withdrawn', color='darkred')
+ax2.set_xticks(x)
+ax2.set_xticklabels(benchmark_df.index, rotation=45, ha="right")
+ax2.legend()
+ax2.set_ylabel("Rs.")
+for bars in [bar1, bar2]:
+    for bar in bars:
+        height = bar.get_height()
+        ax2.annotate(f'{int(height):,}', xy=(bar.get_x() + bar.get_width() / 2, height),
+                     xytext=(0, 3), textcoords="offset points", ha='center', fontsize=8)
+st.pyplot(fig2)
 
-fig5, ax5 = plt.subplots()
-withdrawn_percent.plot(kind="bar", ax=ax5, color=plt.cm.Paired(np.arange(len(withdrawn_percent))))
-ax5.set_ylabel("Withdrawal %")
-ax5.set_ylim(0, 100)
-for i, val in enumerate(withdrawn_percent):
-    ax5.text(i, val - 5, f"{val:.0f}%", ha="center", va="top", color="black")
-ax5.set_xticklabels(withdrawn_percent.index, rotation=45, ha="right")
-st.pyplot(fig5)
-
-# Reason for Non-Withdrawal
+# Horizontal Bar Chart: Reason for Non-Withdrawal
 st.subheader("📌 Reason for Non-Withdrawal")
-non_withdrawal = df_filtered[df_filtered["plw unable to withdraw"] == "yes"]
-reasons = non_withdrawal["reason for non-withdrawal"].value_counts()
-wrapped_labels = ['\n'.join(textwrap.wrap(label, 25)) for label in reasons.index]
-
-fig6, ax6 = plt.subplots()
-bars = ax6.barh(wrapped_labels, reasons.values, color="darkred")
+reason_counts = filtered_df["Reason for Non-Withdrawal"].value_counts()
+fig3, ax3 = plt.subplots()
+bars = ax3.barh(reason_counts.index, reason_counts.values, color='darkred')
+ax3.set_xlabel("PLWs")
 for bar in bars:
-    width = bar.get_width()
-    ax6.text(width - 5, bar.get_y() + bar.get_height() / 2, f"{int(width):,}", ha="right", va="center", color="white")
-ax6.set_xlabel("PLWs")
-st.pyplot(fig6)
-
-# PLW Status Overview
-st.subheader("🧭 PLW Status")
-status_counts = df_filtered["status of plw (nwd or pwd)"].value_counts()
-fig7, ax7 = plt.subplots()
-bars = ax7.barh(status_counts.index, status_counts.values, color=plt.cm.Set3.colors)
-for bar in bars:
-    width = bar.get_width()
-    ax7.text(width - 5, bar.get_y() + bar.get_height() / 2, f"{int(width):,}", ha="right", va="center", color="black")
-ax7.set_xlabel("Count")
-st.pyplot(fig7)
+    ax3.text(bar.get_width() + 2, bar.get_y() + bar.get_height() / 2,
+             f'{bar.get_width():.0f}', va='center')
+st.pyplot(fig3)
