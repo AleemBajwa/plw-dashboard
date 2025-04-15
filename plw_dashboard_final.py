@@ -133,12 +133,12 @@ total_by_adfo = group["PLW CNIC No"].nunique()
 withdraw_by_adfo = filtered_df[filtered_df["Amount withdrawn from Camp (Rs.)"] > 0].groupby("ADFO Name")["PLW CNIC No"].nunique()
 withdraw_pct = (withdraw_by_adfo / total_by_adfo * 100).fillna(0)
 
-fig, ax = plt.subplots(figsize=(6, 2))
-labels = ['\n'.join(textwrap.wrap(label, 12)) for label in withdraw_pct.index]
+fig, ax = plt.subplots(figsize=(9, 2))
+labels = ['\n'.join(textwrap.wrap(label, 8)) for label in withdraw_pct.index]
 bars = ax.bar(labels, withdraw_pct.values, color=plt.cm.Paired.colors)
 for bar in bars:
     height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2, height - 5, f"{int(height)}%", ha="center", va="top", color="white", fontsize=8)
+    ax.text(bar.get_x() + bar.get_width()/2, height - 5, f"{int(height)}%", ha="center", va="top", color="white", fontsize=9)
 ax.set_ylabel("Withdrawal %")
 st.pyplot(fig)
 
