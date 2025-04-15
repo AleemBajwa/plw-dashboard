@@ -1,11 +1,10 @@
-
 import streamlit as st
-st.set_page_config(layout="wide")  # ✅ MUST be the first Streamlit command
-
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from textwrap import wrap
+import numpy as np
+import textwrap
+
+st.set_page_config(page_title="PLW Dashboard", layout="wide")
 
 
 # --- Load data ---
