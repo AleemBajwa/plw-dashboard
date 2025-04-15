@@ -87,22 +87,15 @@ with col1:
     contact_counts = filtered_df["Contact with PLW (Y/N)"].value_counts()
     fig = pie_chart(contact_counts.values, contact_counts.index, "Contact with PLW", ["darkgreen", "darkred"])
     st.pyplot(fig)
-    st.pyplot(fig)
-st.markdown("🟩 **Green:** Yes &nbsp;&nbsp;&nbsp; 🟥 **Red:** No")
 
 with col2:
     visit_counts = filtered_df["PLW visited the Campsite"].value_counts()
     fig = pie_chart(visit_counts.values, visit_counts.index, "Visited Camp", ["darkgreen", "darkred"])
     st.pyplot(fig)
-    st.pyplot(fig)
-st.markdown("🟩 **Green:** Yes &nbsp;&nbsp;&nbsp; 🟥 **Red:** No")
-
 
 with col3:
     fig = pie_chart([withdrawn_cnic, not_withdrawn], ["Withdrawn", "Not Withdrawn"], "Withdrawal Count", ["darkgreen", "darkred"])
     st.pyplot(fig)
-    st.markdown("🟩 **Green:** Yes / Withdrawn &nbsp;&nbsp;&nbsp;&nbsp; 🟥 **Red:** No / Not Withdrawn")
-
 
 # --- PLW Status Horizontal Bar ---
 st.subheader("👤 PLW Status")
