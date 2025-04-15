@@ -65,19 +65,16 @@ c5.metric("Total Withdrawn (Rs.)", f"{int(total_withdrawn_amount):,}")
 c6.metric("Incentive Due (Rs.)", f"{int(eligible_amount):,}")
 
 # Pie Chart Function
-def pie_chart(data, labels, title, colors):
-    fig, ax = plt.subplots(figsize=(5, 5))
+def pie_chart(data, title, colors):
+    fig, ax = plt.subplots(figsize=(3, 3))
     total = sum(data)
-    percentages = [int(round((count / total) * 100)) for count in data]
-    display_labels = [f"{label} ({count:,}, {pct}%)" for label, count, pct in zip(labels, data, percentages)]
-
-    wedges, texts = ax.pie(
+    wedges, texts, autotexts = ax.pie(
         data,
-        labels=display_labels,
-        startangle=75,
+        startangle=90,
         colors=colors,
-        labeldistance=0.0,  # bring labels inward
-        textprops={"color": "white", "fontsize": 10}
+        labels=None,
+        autopct=lambda p: f"{int(round(p * total / 100)):,}, {int(round(p))}%",
+        textprops={'color': 'white', 'fontsize': 9}
     )
     ax.set_title(title)
     return fig
