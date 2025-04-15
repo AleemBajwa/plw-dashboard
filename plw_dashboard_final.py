@@ -10,7 +10,7 @@ st.markdown("""
     <style>
         /* Shrink sidebar width */
         [data-testid="stSidebar"] {
-            width: 220px !important;
+            width: 260px !important;
         }
         [data-testid="stSidebarContent"] {
             padding: 1rem;
