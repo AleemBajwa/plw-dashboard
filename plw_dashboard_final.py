@@ -136,7 +136,7 @@ withdraw_pct = (withdraw_by_adfo / total_by_adfo * 100).fillna(0)
 fig, ax = plt.subplots(figsize=(8, 2))
 labels = ['\n'.join(textwrap.wrap(label, 8)) for label in withdraw_pct.index]
 bars = ax.bar(labels, withdraw_pct.values, color=plt.cm.Paired.colors)
-ax.tick_params(axis='x', labelsize=8)
+ax.tick_params(axis='x', labelsize=7)
 
 for bar in bars:
     height = bar.get_height()
