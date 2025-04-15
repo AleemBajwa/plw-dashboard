@@ -73,7 +73,7 @@ def pie_chart(data, labels, title, colors, size=(3.2, 3.2)):
         data,
         labels=None,
         startangle=90,
-        autopct=lambda p: f"{int(p * sum(data) / 100):,}, {int(p)}%",
+        autopct=lambda p: f"{int(p * sum(data) / 100):,}\n{int(p)}%",
         colors=colors,
         textprops={"color": "white", "fontsize": 10}
     )
