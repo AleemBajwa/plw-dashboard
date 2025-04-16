@@ -135,7 +135,7 @@ for bar in bars:
 st.pyplot(fig)
 
 # --- Camp Site Performance (PLW Wise) ---
-st.subheader("📈 ADFO-wise Withdrawal %")
+st.subheader("📈 Camp Site Performance (PLW Wise)")
 group = filtered_df.groupby("ADFO Name")
 total_by_adfo = group["PLW CNIC No"].nunique()
 withdraw_by_adfo = filtered_df[filtered_df["Amount withdrawn from Camp (Rs.)"] > 0].groupby("ADFO Name")["PLW CNIC No"].nunique()
